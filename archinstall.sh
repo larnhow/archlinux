@@ -33,7 +33,7 @@ KERNEL_PKGS="linux"
 BASE_PKGS="base sudo linux linux-firmware iptables-nft"
 FS_PKGS="dosfstools btrfs-progs e2fsprogs"
 OTHER_PKGS="man-db helix micro"
-OTHER_PKGS="$OTHER_PKGS git base-devel"
+OTHER_PKGS="$OTHER_PKGS git base-devel openssh"
 
 ######################################################
 
