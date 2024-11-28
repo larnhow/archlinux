@@ -50,6 +50,15 @@ fi
 
 echo "
 ######################################################
+# Modify pacman.conf
+######################################################
+"
+
+sed -i '/ParallelDownloads/s/^#//g' /etc/pacman.conf
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf # Enable Multilib
+
+echo "
+######################################################
 # Check internet connection
 # https://wiki.archlinux.org/title/Installation_guide#Connect_to_the_internet
 ######################################################
