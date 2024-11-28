@@ -46,7 +46,7 @@ sed -i '/^HOOKS=/ s/base/base systemd keyboard/' /etc/mkinitcpio.conf
 sed -i '/^HOOKS=/ s/block/sd-vconsole block' /etc/mkinitcpio.conf
 
 
-f="$(GetPackageOriginalFile packmano /etc/pacman.conf)"
+f="$(GetPackageOriginalFile packman /etc/pacman.conf)"
 sed -i '/ParallelDownloads/s/^#//g' /etc/pacman.conf
 sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf # Enable Multilib
 
