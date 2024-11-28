@@ -184,7 +184,7 @@ mount -o "$home_mount_opts,subvol=@home" "$root_part" /mnt/home
 mount -o "$BTRFS_MOUNT_OPTS,nodev,nosuid,noexec,subvol=@snapshots" "$root_part" /mnt/.snapshots
 mount -o "$BTRFS_MOUNT_OPTS,nodev,nosuid,noexec,subvol=@var_log" "$root_part" /mnt/var/log
 mount -o "$BTRFS_MOUNT_OPTS,nodev,nosuid,noexec,subvol=@pacman_pkgs" "$root_part" /mnt/var/cache/pacman/pkg
-mount "$efi_part" /mnt/boot
+mount "$efi_part" /mnt/efi
 
 echo "
 ######################################################
@@ -341,12 +341,12 @@ echo "
 # https://wiki.archlinux.org/title/Unified_kernel_image
 ######################################################
 "
-arch-chroot /mnt mkdir -p /boot/EFI/Linux
+arch-chroot /mnt mkdir -p /efi/EFI/Linux
 for KERNEL in $KERNEL_PKGS
 do
     # Edit default_uki= and fallback_uki=
-    sed -i -E "s@^(#|)default_uki=.*@default_uki=\"/boot/EFI/Linux/ArchLinux-$KERNEL.efi\"@" /mnt/etc/mkinitcpio.d/$KERNEL.preset
-    sed -i -E "s@^(#|)fallback_uki=.*@fallback_uki=\"/boot/EFI/Linux/ArchLinux-$KERNEL-fallback.efi\"@" /mnt/etc/mkinitcpio.d/$KERNEL.preset
+    sed -i -E "s@^(#|)default_uki=.*@default_uki=\"/efi/EFI/Linux/ArchLinux-$KERNEL.efi\"@" /mnt/etc/mkinitcpio.d/$KERNEL.preset
+    sed -i -E "s@^(#|)fallback_uki=.*@fallback_uki=\"/efi/EFI/Linux/ArchLinux-$KERNEL-fallback.efi\"@" /mnt/etc/mkinitcpio.d/$KERNEL.preset
     # Edit default_options= and fallback_options=
     sed -i -E "s@^(#|)default_options=.*@default_options=\"--splash /usr/share/systemd/bootctl/splash-arch.bmp\"@" /mnt/etc/mkinitcpio.d/$KERNEL.preset
     sed -i -E "s@^(#|)fallback_options=.*@fallback_options=\"-S autodetect --cmdline /etc/kernel/cmdline_fallback\"@" /mnt/etc/mkinitcpio.d/$KERNEL.preset
