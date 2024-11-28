@@ -30,7 +30,7 @@ ZRAM_SIZE='min(ram / 2, 4 * 1024)'
 
 # minimal example
 KERNEL_PKGS="linux"
-BASE_PKGS="base sudo linux linux-firmware iptables-nft"
+BASE_PKGS="base sudo linux linux-firmware iptables-nft reflector"
 FS_PKGS="dosfstools btrfs-progs e2fsprogs"
 OTHER_PKGS="man-db helix micro"
 OTHER_PKGS="$OTHER_PKGS git base-devel openssh"
@@ -445,6 +445,12 @@ if [[ $allow_ping == y ]] ; then
         arch-chroot /mnt firewall-offline-cmd --zone=drop --add-icmp-block=echo-reply
     fi
 fi
+
+######################################################
+# Enable services
+######################################################
+systemctl enable fstrim.timer --root=/mnt
+systemctl enable reflector.timer --root=/mnt
 
 
 echo "
