@@ -11,9 +11,9 @@ fi
 ### Config options
 target="/dev/vda"
 rootmnt="/mnt"
-locale="en_GB.UTF-8"
-keymap="uk"
-timezone="Europe/London"
+locale="de_DE.UTF-8"
+keymap="de-latin1"
+timezone="Europe/Berlin"
 hostname="arch-test"
 username="walian"
 #SHA512 hash of password. To generate, run 'mkpasswd -m sha-512', don't forget to prefix any $ symbols with \ . The entry below is the hash of 'password'
