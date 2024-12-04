@@ -118,13 +118,13 @@ while [[ -n $device_id ]]; do
     fi
 done
 
-ESP='/dev/disk/by-partlabel/ESP'
-ROOTFS='/dev/disk/by-partlabel/roofs'
-
 # Reload partition table
 sleep 2
 partprobe -s "$device"
 sleep 2
+
+ESP='/dev/disk/by-partlabel/ESP'
+ROOTFS='/dev/disk/by-partlabel/roofs'
 
 echo "Making File Systems..."
 # Create file systems
