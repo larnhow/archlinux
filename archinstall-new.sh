@@ -8,6 +8,19 @@ if [[ "$UID" -ne 0 ]]; then
     exit 3
 fi
 
+# Microcode detector (function).
+microcode_detector () {
+    CPU=$(grep vendor_id /proc/cpuinfo)
+    if [[ "$CPU" == *"AuthenticAMD"* ]]; then
+        info_print "An AMD CPU has been detected, the AMD microcode will be installed."
+        microcode="amd-ucode"
+    else
+        info_print "An Intel CPU has been detected, the Intel microcode will be installed."
+        microcode="intel-ucode"
+    fi
+}
+microcode_detector
+
 ### Config options
 target="/dev/vda"
 rootmnt="/mnt"
@@ -30,8 +43,8 @@ pacstrappacs=(
         base
         linux
         linux-firmware
-        amd-ucode
-        vi
+        $microcode
+        helix
         nano
         cryptsetup
         util-linux
@@ -39,6 +52,8 @@ pacstrappacs=(
         dosfstools
         sudo
         networkmanager
+	git
+ 	openssh
         )    
 ### Desktop packages #####
 guipacs=(
@@ -52,44 +67,78 @@ guipacs=(
  	sbctl
 	)
 
+echo "
+######################################################
+# Modify pacman.conf
+######################################################
+"
+sed -i '/ParallelDownloads/s/^#//g' /etc/pacman.conf
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf # Enable Multilib
 
+echo "
+######################################################
+# EFI boot settings
+# https://man.archlinux.org/man/efibootmgr.8
+######################################################
+"
+efibootmgr --unicode
+efi_boot_id=" "
+while [[ -n $efi_boot_id ]]; do
+    echo -e "\nDo you want to delete any boot entries?: "
+    read -p "Enter boot number (empty to skip): " efi_boot_id
+    if [[ -n $efi_boot_id ]] ; then
+        efibootmgr --bootnum $efi_boot_id --delete-bootnum --unicode
+    fi
+done
 
+echo "
+######################################################
+# Partition disks
+# https://wiki.archlinux.org/title/Installation_guide#Partition_the_disks
+######################################################
+"
+umount -R /mnt
+devices=$(lsblk --nodeps --paths --list --noheadings --sort=size --output=name,size,model | grep --invert-match "loop" | cat --number)
 
-# Partition
-echo "Creating partitions..."
-sgdisk -Z "$target"
-sgdisk \
-    -n1:0:+512M  -t1:ef00 -c1:EFISYSTEM \
-    -N2          -t2:8304 -c2:linux \
-    "$target"
+device_id=" "
+while [[ -n $device_id ]]; do
+    echo -e "Choose device to format:"
+    echo "$devices"
+    read -p "Enter a number (empty to skip): " device_id
+    if [[ -n $device_id ]] ; then
+        device=$(echo "$devices" | awk "\$1 == $device_id { print \$2}")
+        blkdiscard $device -f
+	output "Creating new partition scheme on ${disk}."
+	sgdisk -g "${disk}"
+	sgdisk -I -n 1:0:+512M -t 1:ef00 -c 1:'ESP' "${disk}"
+	sgdisk -I -n 2:0:0 -t 2:8304 -c 2:'rootfs' "${disk}"
+    fi
+done
+
+ESP='/dev/disk/by-partlabel/ESP'
+ROOTFS='/dev/disk/by-partlabel/roofs'
+
 # Reload partition table
 sleep 2
-partprobe -s "$target"
+partprobe -s "$device"
 sleep 2
-echo "Encrypting root partition..."
-#Encrypt the root partition. If badidea=yes, then pipe cryptpass and carry on, if not, prompt for it
-if [[ "$badidea" == "yes" ]]; then
-echo -n "$crypt_password" | cryptsetup luksFormat --type luks2 /dev/disk/by-partlabel/linux -
-echo -n "$crypt_password" | cryptsetup luksOpen /dev/disk/by-partlabel/linux root -
-else
-cryptsetup luksFormat --type luks2 /dev/disk/by-partlabel/linux
-cryptsetup luksOpen /dev/disk/by-partlabel/linux root
-fi
+
 echo "Making File Systems..."
 # Create file systems
-mkfs.vfat -F32 -n EFISYSTEM /dev/disk/by-partlabel/EFISYSTEM
-mkfs.ext4 -L linux /dev/mapper/root
+mkfs.vfat -F32 -n ESP ${ESP}.
+mkfs.ext4 -m 0 -L Archlinux ${ROOTFS}
+
 # mount the root, and create + mount the EFI directory
 echo "Mounting File Systems..."
-mount /dev/mapper/root "$rootmnt"
-mkdir "$rootmnt"/efi -p
-mount -t vfat /dev/disk/by-partlabel/EFISYSTEM "$rootmnt"/efi
+mount /dev/disk/by-label/Archlinux /mnt
+mkdir /mnt/efi -p
+mount -t vfat /dev/disk/by-label/ESP /mnt/efi
 
 
 
 #Update pacman mirrors and then pacstrap base install
 echo "Pacstrapping..."
-reflector --country GB --age 24 --protocol http,https --sort rate --save /etc/pacman.d/mirrorlist
+reflector --country DE --age 24 --protocol http,https --sort rate --save /etc/pacman.d/mirrorlist
 pacstrap -K $rootmnt "${pacstrappacs[@]}" 
 
 echo "Setting up environment..."
