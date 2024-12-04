@@ -134,11 +134,12 @@ mkfs.ext4 -m 0 -L Archlinux ${ROOTFS}
 # mount the root, and create + mount the EFI directory
 rootmnt=/mnt
 echo "Mounting File Systems..."
-mount /dev/disk/by-label/Archlinux $rootmnt
+mount ${ROOTFS} $rootmnt
 mkdir $rootmnt/efi -p
-mount -t vfat /dev/disk/by-label/ESP $rootmnt/efi
+mount -t vfat ${ESP} $rootmnt/efi
 
-
+lsblk
+read -p
 
 #Update pacman mirrors and then pacstrap base install
 echo "Pacstrapping..."
