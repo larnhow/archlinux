@@ -464,7 +464,7 @@ sed -i '/^# %wheel ALL=(ALL:ALL) ALL/ s/# //' /mnt/etc/sudoers
 
 read -p "Tell me your username: " username
 arch-chroot /mnt useradd -m -G wheel "$username"
-arch-chroot /mnt passwd "$username"
+arch-chroot /mnt #passwd "$username"
 
 echo "Enter root password"
 arch-chroot /mnt passwd
