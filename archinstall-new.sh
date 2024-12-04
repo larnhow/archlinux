@@ -27,8 +27,8 @@ rootmnt="/mnt"
 locale="de_DE.UTF-8"
 keymap="de-latin1"
 timezone="Europe/Berlin"
-hostname="arch-test"
-username="walian"
+hostname="install"
+username="gandor"
 #SHA512 hash of password. To generate, run 'mkpasswd -m sha-512', don't forget to prefix any $ symbols with \ . The entry below is the hash of 'password'
 user_password="\$6\$/VBa6GuBiFiBmi6Q\$yNALrCViVtDDNjyGBsDG7IbnNR0Y/Tda5Uz8ToyxXXpw86XuCVAlhXlIvzy1M8O.DWFB6TRCia0hMuAJiXOZy/"
 
@@ -65,6 +65,8 @@ guipacs=(
 	neofetch
 	mousepad
  	sbctl
+  	firefox
+   	firefox-i18n-de
 	)
 
 echo "
@@ -129,22 +131,24 @@ mkfs.vfat -F32 -n ESP ${ESP}.
 mkfs.ext4 -m 0 -L Archlinux ${ROOTFS}
 
 # mount the root, and create + mount the EFI directory
+rootmnt=/mnt
 echo "Mounting File Systems..."
-mount /dev/disk/by-label/Archlinux /mnt
-mkdir /mnt/efi -p
-mount -t vfat /dev/disk/by-label/ESP /mnt/efi
+mount /dev/disk/by-label/Archlinux $rootmnt
+mkdir $rootmnt/efi -p
+mount -t vfat /dev/disk/by-label/ESP $rootmnt/efi
 
 
 
 #Update pacman mirrors and then pacstrap base install
 echo "Pacstrapping..."
-reflector --country DE --age 24 --protocol http,https --sort rate --save /etc/pacman.d/mirrorlist
+reflector --country DE --age 24 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 pacstrap -K $rootmnt "${pacstrappacs[@]}" 
 
 echo "Setting up environment..."
 #set up locale/env
 #add our locale to locale.gen
 sed -i -e "/^#"$locale"/s/^#//" "$rootmnt"/etc/locale.gen
+sed -i -e "/^#us_US/s/^#//" "$rootmnt"/etc/locale.gen
 #remove any existing config files that may have been pacstrapped, systemd-firstboot will then regenerate them
 rm "$rootmnt"/etc/{machine-id,localtime,hostname,shadow,locale.conf} ||
 systemd-firstboot --root "$rootmnt" \
@@ -155,7 +159,7 @@ systemd-firstboot --root "$rootmnt" \
 arch-chroot "$rootmnt" locale-gen
 echo "Configuring for first boot..."
 #add the local user
-arch-chroot "$rootmnt" useradd -G wheel -m -p "$user_password" "$username" 
+arch-chroot "$rootmnt" useradd -G wheel -m "$username" 
 #uncomment the wheel group in the sudoers file
 sed -i -e '/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/s/^# //' "$rootmnt"/etc/sudoers
 #create a basic kernel cmdline, we're using DPS so we don't need to have anything here really, but if the file doesn't exist, mkinitcpio will complain
@@ -191,19 +195,11 @@ systemctl --root "$rootmnt" mask systemd-networkd
 #regenerate the ramdisk, this will create our UKI
 echo "Generating UKI and installing Boot Loader..."
 arch-chroot "$rootmnt" mkinitcpio -p linux
-echo "Setting up Secure Boot..."
-if [[ "$(efivar -d --name 8be4df61-93ca-11d2-aa0d-00e098032b8c-SetupMode)" -eq 1 ]]; then
-arch-chroot "$rootmnt" sbctl create-keys
-arch-chroot "$rootmnt" sbctl enroll-keys -m
-arch-chroot "$rootmnt" sbctl sign -s -o /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed /usr/lib/systemd/boot/efi/systemd-bootx64.efi
-arch-chroot "$rootmnt" sbctl sign -s "${default_uki//\"}"
-else
-echo "Not in Secure Boot setup mode. Skipping..."
-fi
+
 #install the systemd-boot bootloader
 arch-chroot "$rootmnt" bootctl install --esp-path=/efi
 #lock the root account
-arch-chroot "$rootmnt" usermod -L root
+#arch-chroot "$rootmnt" usermod -L root
 #and we're done
 
 
