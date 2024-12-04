@@ -30,13 +30,7 @@ timezone="Europe/Berlin"
 hostname="install"
 username="gandor"
 #SHA512 hash of password. To generate, run 'mkpasswd -m sha-512', don't forget to prefix any $ symbols with \ . The entry below is the hash of 'password'
-user_password="\$6\$/VBa6GuBiFiBmi6Q\$yNALrCViVtDDNjyGBsDG7IbnNR0Y/Tda5Uz8ToyxXXpw86XuCVAlhXlIvzy1M8O.DWFB6TRCia0hMuAJiXOZy/"
-
-#To fully automate the setup, change badidea=no to yes, and enter a cleartext password for the disk encryption 
-
-badidea="no"
-crypt_password="changeme"
-
+#user_password="\$6\$/VBa6GuBiFiBmi6Q\$yNALrCViVtDDNjyGBsDG7IbnNR0Y/Tda5Uz8ToyxXXpw86XuCVAlhXlIvzy1M8O.DWFB6TRCia0hMuAJiXOZy/"
 
 ### Packages to pacstrap ##
 pacstrappacs=(
@@ -139,7 +133,6 @@ mkfs.vfat -F32 -n ESP ${ESP}
 mkfs.ext4 -m 0 -L Archlinux ${ROOTFS}
 
 # mount the root, and create + mount the EFI directory
-rootmnt='/mnt'
 echo "Mounting File Systems..."
 mount ${ROOTFS} $rootmnt
 mkdir $rootmnt/efi -p
@@ -150,7 +143,7 @@ read -p "Press Key to continue"
 
 #Update pacman mirrors and then pacstrap base install
 echo "Pacstrapping..."
-reflector --country DE --age 24 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+#reflector --country DE --age 24 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 pacstrap -K $rootmnt "${pacstrappacs[@]}" 
 
 echo "Setting up environment..."
@@ -192,8 +185,8 @@ declare $(grep default_uki "$rootmnt"/etc/mkinitcpio.d/linux.preset)
 arch-chroot "$rootmnt" mkdir -p "$(dirname "${default_uki//\"}")"
 
 #install the gui packages
-echo "Installing GUI..."
-arch-chroot "$rootmnt" pacman -Sy "${guipacs[@]}" --noconfirm --quiet
+#echo "Installing GUI..."
+#arch-chroot "$rootmnt" pacman -Sy "${guipacs[@]}" --noconfirm --quiet
 
 
 #enable the services we will need on start up
@@ -209,11 +202,11 @@ arch-chroot "$rootmnt" mkinitcpio -p linux
 arch-chroot "$rootmnt" bootctl install --esp-path=/efi
 #lock the root account
 
-echo "Please enter root pw..."
-arch-chroot "$rootmnt" passwd root
+echo "Enter $username passwd"
+arch-chroot /mnt passwd "$username"
 
-echo "Please enter root user..."
-arch-chroot "$rootmnt" passwd gandor
+echo "Enter root password"
+arch-chroot /mnt passwd
 
 #arch-chroot "$rootmnt" usermod -L root
 #and we're done
