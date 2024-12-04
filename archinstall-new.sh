@@ -124,7 +124,7 @@ partprobe -s "$device"
 sleep 2
 
 ESP='/dev/disk/by-partlabel/ESP'
-ROOTFS='/dev/disk/by-partlabel/roofs'
+ROOTFS='/dev/disk/by-partlabel/rootfs'
 
 ls $ESP
 ls $ROOTFS
