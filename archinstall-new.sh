@@ -109,7 +109,7 @@ while [[ -n $device_id ]]; do
     read -p "Enter a number (empty to skip): " device_id
     if [[ -n $device_id ]] ; then
         device=$(echo "$devices" | awk "\$1 == $device_id { print \$2}")
-        blkdiscard $device -f
+        #blkdiscard $device -f
 	output "Creating new partition scheme on ${disk}."
 	sgdisk -g "${disk}"
 	sgdisk -I -n 1:0:+512M -t 1:ef00 -c 1:'ESP' "${disk}"
