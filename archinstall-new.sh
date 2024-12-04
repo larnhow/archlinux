@@ -110,10 +110,10 @@ while [[ -n $device_id ]]; do
     if [[ -n $device_id ]] ; then
         device=$(echo "$devices" | awk "\$1 == $device_id { print \$2}")
         #blkdiscard $device -f
-	output "Creating new partition scheme on ${disk}."
+	echo "Creating new partition scheme on ${device}."
 	sgdisk -g "${disk}"
-	sgdisk -I -n 1:0:+512M -t 1:ef00 -c 1:'ESP' "${disk}"
-	sgdisk -I -n 2:0:0 -t 2:8304 -c 2:'rootfs' "${disk}"
+	sgdisk -I -n 1:0:+512M -t 1:ef00 -c 1:'ESP' "${device}"
+	sgdisk -I -n 2:0:0 -t 2:8304 -c 2:'rootfs' "${device}"
     fi
 done
 
