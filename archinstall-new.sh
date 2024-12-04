@@ -126,6 +126,13 @@ sleep 2
 ESP='/dev/disk/by-partlabel/ESP'
 ROOTFS='/dev/disk/by-partlabel/roofs'
 
+ls $ESP
+ls $ROOTFS
+
+lsblk
+read -p "Press Key to continue"
+
+
 echo "Making File Systems..."
 # Create file systems
 mkfs.vfat -F32 -n ESP ${ESP}
@@ -139,7 +146,7 @@ mkdir $rootmnt/efi -p
 mount -t vfat ${ESP} $rootmnt/efi
 
 lsblk
-read -p
+read -p "Press Key to continue"
 
 #Update pacman mirrors and then pacstrap base install
 echo "Pacstrapping..."
