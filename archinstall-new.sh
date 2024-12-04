@@ -139,7 +139,7 @@ mkfs.vfat -F32 -n ESP ${ESP}
 mkfs.ext4 -m 0 -L Archlinux ${ROOTFS}
 
 # mount the root, and create + mount the EFI directory
-rootmnt=/mnt
+rootmnt='/mnt'
 echo "Mounting File Systems..."
 mount ${ROOTFS} $rootmnt
 mkdir $rootmnt/efi -p
@@ -208,6 +208,13 @@ arch-chroot "$rootmnt" mkinitcpio -p linux
 #install the systemd-boot bootloader
 arch-chroot "$rootmnt" bootctl install --esp-path=/efi
 #lock the root account
+
+echo "Please enter root pw..."
+arch-chroot "$rootmnt" passwd root
+
+echo "Please enter root user..."
+arch-chroot "$rootmnt" passwd gandor
+
 #arch-chroot "$rootmnt" usermod -L root
 #and we're done
 
