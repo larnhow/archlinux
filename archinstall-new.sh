@@ -191,7 +191,7 @@ arch-chroot "$rootmnt" mkdir -p "$(dirname "${default_uki//\"}")"
 
 #enable the services we will need on start up
 echo "Enabling services..."
-systemctl --root "$rootmnt" enable systemd-resolved systemd-timesyncd NetworkManager sddm
+systemctl --root "$rootmnt" enable systemd-resolved systemd-timesyncd NetworkManager #sddm
 #mask systemd-networkd as we will use NetworkManager instead
 systemctl --root "$rootmnt" mask systemd-networkd
 #regenerate the ramdisk, this will create our UKI
@@ -215,6 +215,4 @@ arch-chroot /mnt passwd
 echo "-----------------------------------"
 echo "- Install complete. Rebooting.... -"
 echo "-----------------------------------"
-sleep 10
 sync
-reboot
