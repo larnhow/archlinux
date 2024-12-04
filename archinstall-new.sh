@@ -128,7 +128,7 @@ ROOTFS='/dev/disk/by-partlabel/roofs'
 
 echo "Making File Systems..."
 # Create file systems
-mkfs.vfat -F32 -n ESP ${ESP}.
+mkfs.vfat -F32 -n ESP ${ESP}
 mkfs.ext4 -m 0 -L Archlinux ${ROOTFS}
 
 # mount the root, and create + mount the EFI directory
