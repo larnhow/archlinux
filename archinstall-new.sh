@@ -43,25 +43,13 @@ pacstrappacs=(
         cryptsetup
         util-linux
         e2fsprogs
+	btrfs-progs
         dosfstools
         sudo
         networkmanager
 	git
  	openssh
         )    
-### Desktop packages #####
-guipacs=(
-	plasma 
-	sddm 
-	kitty
-	firefox 
-	nm-connection-editor
-	neofetch
-	mousepad
- 	sbctl
-  	firefox
-   	firefox-i18n-de
-	)
 
 echo "
 ######################################################
@@ -130,11 +118,23 @@ read -p "Press Key to continue"
 echo "Making File Systems..."
 # Create file systems
 mkfs.vfat -F32 -n ESP ${ESP}
-mkfs.ext4 -m 0 -L Archlinux ${ROOTFS}
+mkfs.btrfs -L Archlinux ${ROOTFS}
 
 # mount the root, and create + mount the EFI directory
 echo "Mounting File Systems..."
 mount ${ROOTFS} $rootmnt
+btrfs subvolume create /mnt/@
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@snapshots
+btrfs subvolume create /mnt/@var_log
+btrfs subvolume create /mnt/@pacman_pkgs
+umount ${ROOTFS}
+mount -o "compress=zstd:1,noatime,subvol=@" $rootmnt
+mkdir /mnt/@/{efi,home,.snapshots}
+mkdir -p /mnt/@/var/log
+mkdir -p /mnt/@/var/cache/pacman/pkg
+
+
 mkdir $rootmnt/efi -p
 mount -t vfat ${ESP} $rootmnt/efi
 
@@ -183,11 +183,6 @@ sed -i \
 #read the UKI setting and create the folder structure otherwise mkinitcpio will crash
 declare $(grep default_uki "$rootmnt"/etc/mkinitcpio.d/linux.preset)
 arch-chroot "$rootmnt" mkdir -p "$(dirname "${default_uki//\"}")"
-
-#install the gui packages
-#echo "Installing GUI..."
-#arch-chroot "$rootmnt" pacman -Sy "${guipacs[@]}" --noconfirm --quiet
-
 
 #enable the services we will need on start up
 echo "Enabling services..."
