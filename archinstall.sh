@@ -151,15 +151,6 @@ echo "Running command: mkfs.fat -n boot -F 32 $efi_part"
 # create fat32 partition with name(label) boot
 mkfs.fat -n boot -F 32 "$efi_part"
 
-# swap partition
-if [[ -n $swap_id ]] ; then
-    echo "Formatting swap partition ..."
-    echo "Running command: mkswap -L swap $swap_part"
-    # create swap partition with label swap
-    mkswap -L swap "$swap_part"
-fi
-
-
 root_block=$root_part
 
 
@@ -340,6 +331,18 @@ if [[ $zram == y ]] ; then
     echo "vm.page-cluster = 0"             >> /mnt/etc/sysctl.d/99-vm-zram-parameters.conf
 fi
 
+echo "
+######################################################
+# Set kernel params
+######################################################
+"
+echo "net.ipv6.conf.all.use_tempaddr = 2"  > /mnt/etc/sysctl.d/40-ipv6.conf.conf
+echo "net.ipv4.tcp_congestion_control=bbr" > /mnt/etc/sysctl.d/70-steam.conf
+echo "net.core.rmem_max=16777216"         >> /mnt/etc/sysctl.d/70-steam.conf
+echo "net.core.wmem_max=16777216"         >> /mnt/etc/sysctl.d/70-steam.conf
+echo "net.ipv4.tcp_wmem=8192 87380 16777216" >> /mnt/etc/sysctl.d/70-steam.conf
+echo "net.ipv4.tcp_rmem=8192 87380 16777216" >> /mnt/etc/sysctl.d/70-steam.conf
+echo "vm.max_map_count = 2147483642"         >> /mnt/etc/sysctl.d/70-steam.conf
 
 # Fallback kernel cmdline parameters (without SELinux, VFIO)
 echo "$kernel_cmd" > /mnt/etc/kernel/cmdline_fallback
