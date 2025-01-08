@@ -1,0 +1,11 @@
+# archlinux
+
+sudo pacman -Syu ghostty fish
+
+## printer
+sudo pacman -Syu cups cups-pdf system-config-printer avahi nss-mdns
+sudo systemctl enable --now cups
+sudo systemctl enable --now avahi-daemon
+sudo nano /etc/nsswitch.conf
+    hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns
+sudo systemctl restart avahi-daemon
