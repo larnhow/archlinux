@@ -1,10 +1,17 @@
-= archlinux
+# Archlinux
 
-== Install
+## Install
 
-=== Partition
+### Partition
 
-== printer
+```
+device=/dev/vda
+```
+
+
+
+
+## printer
 sudo pacman -Syu cups cups-pdf system-config-printer avahi nss-mdns
 sudo systemctl enable --now cups
 sudo systemctl enable --now avahi-daemon
