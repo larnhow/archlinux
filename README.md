@@ -195,6 +195,9 @@ sudo systemctl enable --now power-profiles-daemon
 ## gui    
     sudo pacman -Syu firefox firefox-i18n-de thunderbird thunderbird-i18n-de mpv ttf-jetbrains-mono-nerd --needed
     
+## Plasma KDE
+     sudo pacman -Syu plasma-meta kde-applications-meta
+
 ## dolphin
     sudo pacman -Syu kdegraphics-thumbnailers kimageformats qt6-imageformats ffmpegthumbs icoutils --needed
 
