@@ -1,8 +1,10 @@
-# archlinux
+= archlinux
 
-sudo pacman -Syu ghostty fish
+== Install
 
-## printer
+=== Partition
+
+== printer
 sudo pacman -Syu cups cups-pdf system-config-printer avahi nss-mdns
 sudo systemctl enable --now cups
 sudo systemctl enable --now avahi-daemon
