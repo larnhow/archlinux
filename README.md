@@ -21,11 +21,14 @@ sgdisk -I -n 2:0:0 -t 2:8309 -c 2:'luksroot' "${device}"
 
 ### Luks2
 ```
-ESP='/dev/disk/by-partlabel/efi'
+ESP='/dev/disk/by-partlabel/efi' && \
 ROOTFS='/dev/disk/by-partlabel/luksroot'
 
-cryptsetup luksFormat --type luks2 --sector-size 4096 ${ROOTFS}
+cryptsetup luksFormat --type luks2 --sector-size 4096 ${ROOTFS} && \
 cryptsetup open "$CRYPTROOT" luksroot
+
+cryptsetup --allow-discards --perf-no_read_workqueue --perf-no_write_workqueue --persistent refresh luks-36cade11-7756-4c7e-8cef-9d76367befb5
+
 ```
 
 ### Filesystems
@@ -40,13 +43,11 @@ mkfs.btrfs -L fsroot "$BTRFS"
 
 #### Creating BTRFS subvolumes.
 ```
-mount "$BTRFS" /mnt
-
-btrfs subvolume create /mnt/@
-btrfs subvolume create /mnt/@home
-btrfs subvolume create /mnt/@snapshots
-btrfs subvolume create /mnt/@var_log
-
+mount "$BTRFS" /mnt && \
+btrfs subvolume create /mnt/@ && \
+btrfs subvolume create /mnt/@home && \
+btrfs subvolume create /mnt/@snapshots && \
+btrfs subvolume create /mnt/@var_log && \
 umount /mnt
 
 ```
@@ -158,10 +159,18 @@ umount -R /mnt && reboot
 sudo pacman -Syu cups cups-pdf system-config-printer avahi nss-mdns && \
 sudo systemctl enable --now cups && \
 sudo systemctl enable --now avahi-daemon && \
-sudo nano /etc/nsswitch.conf 
-hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns 
-sudo systemctl restart avahi-daemon
+sudo nano /etc/nsswitch.conf
+```
 
+```
+hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns 
+```
+
+```
+sudo systemctl restart avahi-daemon
+```
+
+```
 lpadmin -p xerox -v ipp://xerox.home.arpa/ipp/print -m everywhere
 ```
 
@@ -193,8 +202,10 @@ sudo systemctl enable --now power-profiles-daemon
     sudo pacman -Syu libreoffice-fresh ttf-caladea ttf-carlito ttf-dejavu ttf-liberation ttf-linux-libertine-g noto-fonts adobe-source-code-pro-fonts adobe-source-sans-fonts adobe-source-serif-fonts hunspell hunspell-de hunspell-en_us hyphen hyphen-en hyphen-de libmythes mythes-en mythes-de languagetool jdk-openjdk --needed
     
 ## bluetooth
-sudo pacman -Syu bluez bluez-utils blueman --needed
-sudo systemctl enable --now bluetooth.service
+
+
+    sudo pacman -Syu bluez bluez-utils blueman --needed
+    sudo systemctl enable --now bluetooth.service
 
 ## network shares
 
@@ -277,7 +288,7 @@ flatpak install \
 ## Virtualisation
 
 ### podman
-sudo pacman -Syu podman --needed
+    sudo pacman -Syu podman --needed
 
 
 
